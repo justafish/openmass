@@ -25,6 +25,7 @@ jobs:
       - name: Start DDEV
         run: |
           ddev service disable portainer
+          cp .ddev/.env.example .ddev/.env
           ddev start
 
       - name: Setup Project
