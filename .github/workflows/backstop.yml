@@ -1,0 +1,40 @@
+name: BackstopJS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Backstop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: jonaseberle/github-action-setup-ddev@v1
+
+      - name: Setup Project
+        run: |
+          ddev composer install
+          ddev yarn
+          ddev service enable backstop
+
+      - name: Fetch Reference Images
+        run: ddev backstop --config=backstop.js reference --target=prod --list=all --viewport=all
+
+      - name: Compare Local to Reference Images
+        run: ddev backstop --config=backstop.js test --target=prod --list=all --viewport=all
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: backstop/report
+          path: backstop/report
