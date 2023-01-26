@@ -19,6 +19,13 @@ jobs:
         uses: actions/checkout@v3
 
       - uses: jonaseberle/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      - name: Start DDEV
+        run: |
+          ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent,portainer
+          ddev start
 
       - name: Setup Project
         run: |
